@@ -3,6 +3,8 @@ const connectDB = require("./mongodb/connect");
 const express = require("express");
 const app = express();
 const routes = require("./router/task");
+const notFound = require("./middleware/not-found");
+const errorHandlerMiddleware = require("./middleware/error-handler");
 require("dotenv").config();
 
 //middleware
@@ -15,7 +17,8 @@ app.use(express.json());
 // });
 
 app.use("/api/v1/tasks", routes);
-
+app.use(notFound);
+app.use(errorHandlerMiddleware);
 //api/version/tasks that it will perform
 //api.get('/api/v1/tasks')    -get all tasks
 //api.post('/api/v1/tasks')    -create a new tasks

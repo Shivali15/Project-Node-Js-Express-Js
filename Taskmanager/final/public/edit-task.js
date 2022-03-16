@@ -1,82 +1,65 @@
-const tasksDOM = document.querySelector(".tasks");
-const loadingDOM = document.querySelector(".loading-text");
-const formDOM = document.querySelector(".task-form");
-const taskInputDOM = document.querySelector(".task-input");
+const taskIDDOM = document.querySelector(".task-edit-id");
+const taskNameDOM = document.querySelector(".task-edit-name");
+const taskCompletedDOM = document.querySelector(".task-edit-completed");
+const editFormDOM = document.querySelector(".single-task-form");
+const editBtnDOM = document.querySelector(".task-edit-btn");
 const formAlertDOM = document.querySelector(".form-alert");
-// Load tasks from /api/tasks
-const showTasks = async () => {
-  loadingDOM.style.visibility = "visible";
+const params = window.location.search;
+const id = new URLSearchParams(params).get("id");
+let tempName;
+
+const showTask = async () => {
   try {
     const {
-      data: { tasks },
-    } = await axios.get("/api/v1/tasks");
-    if (tasks.length < 1) {
-      tasksDOM.innerHTML = '<h5 class="empty-list">No tasks in your list</h5>';
-      loadingDOM.style.visibility = "hidden";
-      return;
+      data: { task },
+    } = await axios.get(`/api/v1/tasks/${id}`);
+    const { _id: taskID, completed, name } = task;
+
+    taskIDDOM.textContent = taskID;
+    taskNameDOM.value = name;
+    tempName = name;
+    if (completed) {
+      taskCompletedDOM.checked = true;
     }
-    const allTasks = tasks
-      .map((task) => {
-        const { completed, _id: taskID, name } = task;
-        return `<div class="single-task ${completed && "task-completed"}">
-<h5><span><i class="far fa-check-circle"></i></span>${name}</h5>
-<div class="task-links">
-<!-- edit link -->
-<a href="task.html?id=${taskID}"  class="edit-link">
-<i class="fas fa-edit"></i>
-</a>
-<!-- delete btn -->
-<button type="button" class="delete-btn" data-id="${taskID}">
-<i class="fas fa-trash"></i>
-</button>
-</div>
-</div>`;
-      })
-      .join("");
-    tasksDOM.innerHTML = allTasks;
   } catch (error) {
-    tasksDOM.innerHTML =
-      '<h5 class="empty-list">There was an error, please try later....</h5>';
+    console.log(error);
   }
-  loadingDOM.style.visibility = "hidden";
 };
 
-showTasks();
+showTask();
 
-// delete task /api/tasks/:id
-
-tasksDOM.addEventListener("click", async (e) => {
-  const el = e.target;
-  if (el.parentElement.classList.contains("delete-btn")) {
-    loadingDOM.style.visibility = "visible";
-    const id = el.parentElement.dataset.id;
-    try {
-      await axios.delete(`/api/v1/tasks/${id}`);
-      showTasks();
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  loadingDOM.style.visibility = "hidden";
-});
-
-// form
-
-formDOM.addEventListener("submit", async (e) => {
+editFormDOM.addEventListener("submit", async (e) => {
+  editBtnDOM.textContent = "Loading...";
   e.preventDefault();
-  const name = taskInputDOM.value;
-
   try {
-    await axios.post("/api/v1/tasks", { name });
-    showTasks();
-    taskInputDOM.value = "";
+    const taskName = taskNameDOM.value;
+    const taskCompleted = taskCompletedDOM.checked;
+
+    const {
+      data: { task },
+    } = await axios.patch(`/api/v1/tasks/${id}`, {
+      name: taskName,
+      completed: taskCompleted,
+    });
+
+    const { _id: taskID, completed, name } = task;
+
+    taskIDDOM.textContent = taskID;
+    taskNameDOM.value = name;
+    tempName = name;
+    if (completed) {
+      taskCompletedDOM.checked = true;
+    }
     formAlertDOM.style.display = "block";
-    formAlertDOM.textContent = `success, task added`;
+    formAlertDOM.textContent = `success, edited task`;
     formAlertDOM.classList.add("text-success");
   } catch (error) {
+    console.error(error);
+    taskNameDOM.value = tempName;
     formAlertDOM.style.display = "block";
     formAlertDOM.innerHTML = `error, please try again`;
   }
+  editBtnDOM.textContent = "Edit";
   setTimeout(() => {
     formAlertDOM.style.display = "none";
     formAlertDOM.classList.remove("text-success");
