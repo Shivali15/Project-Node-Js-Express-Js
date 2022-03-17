@@ -36,16 +36,20 @@ const getallproducts = async (req, res) => {
     queryObject.name = { $regex: name, $options: "i" };
   }
   if (numericFilters) {
+    //mapping user
     const operatorMap = {
-      ">": "$gt",
-      ">=": "$gte",
-      "=": "$eq",
-      "<": "$lt",
-      "<=": "$lte",
+      ">": "$gt", //greater than
+      ">=": "$gte", //greater than equal
+      "=": "$eq", //equal
+      "<": "$lt", //less than
+      "<=": "$lte", //less than equal
     };
     const regEx = /\b(<|>|>=|=|<|<=)\b/g;
     let filters = numericFilters.replace(
       regEx,
+      //callback function
+      //if match is there then it will call
+
       (match) => `-${operatorMap[match]}-`
     );
     const options = ["price", "rating"];
@@ -85,7 +89,8 @@ const getallproducts = async (req, res) => {
 
   result = result.skip(skip).limit(limit);
   // 23
-  // 4 7 7 7 2
+  //pages: 4
+  //    7 7 7 2
 
   const products = await result;
   res.status(200).json({ products, nbHits: products.length });
