@@ -11,7 +11,7 @@ const { BadRequestError } = require("../errors");
 //package that handles express async error
 
 const login = async (req, res) => {
-  //check for usernam en passwprd
+  //check for username n passwprd
   //since method is post so data  req.body mein hoga
   const { username, password } = req.body;
   // mongoose validation :if values not persent there poke error

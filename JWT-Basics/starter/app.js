@@ -26,7 +26,7 @@ app.use(errorHandlerMiddleware);
 
 //navigate to browser at localhost 3000
 // port variable which access port in which it will execute
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 //setup port
 const start = async () => {
